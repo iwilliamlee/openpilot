@@ -85,6 +85,16 @@ class TestMonitoring:
                     ((TEST_TIMESPAN-10-d_status.settings._DISTRACTED_TIME)/2))/DT_DMON)].names[0] == EventName.driverDistracted
     assert isinstance(d_status.awareness, float)
 
+  # engaged, driver is briefly distracted in active monitoring
+  #  - brief glances should not trip the prompt or terminal alert too quickly
+  def test_active_monitoring_escalates_later(self):
+    events, d_status = self._run_seq(always_distracted, always_false, always_true, always_false)
+    assert not any(EventName.promptDriverDistracted in event.names for event in events[:int(6.0 / DT_DMON)])
+    assert events[int(6.5 / DT_DMON)].names[0] == EventName.promptDriverDistracted
+    assert not any(EventName.driverDistracted in event.names for event in events[:int(13.0 / DT_DMON)])
+    assert events[int(13.5 / DT_DMON)].names[0] == EventName.driverDistracted
+    assert isinstance(d_status.awareness, float)
+
   # engaged, no face detected the whole time, no action
   def test_fully_invisible_driver(self):
     events, d_status = self._run_seq(always_no_face, always_false, always_true, always_false)
@@ -132,7 +142,7 @@ class TestMonitoring:
                                                         = [False] * int(0.5/DT_DMON)
     events, _ = self._run_seq(ds_vector, interaction_vector, op_vector, always_false)
     assert events[int((DISTRACTED_SECONDS_TO_ORANGE+0.5*_invisible_time)/DT_DMON)].names[0] == EventName.promptDriverDistracted
-    assert events[int((DISTRACTED_SECONDS_TO_RED+1.5*_invisible_time)/DT_DMON)].names[0] == EventName.driverDistracted
+    assert events[int((DISTRACTED_SECONDS_TO_RED+2*_invisible_time+1.25)/DT_DMON)].names[0] == EventName.driverDistracted
     assert events[int((DISTRACTED_SECONDS_TO_RED+2*_invisible_time+1.5)/DT_DMON)].names[0] == EventName.driverDistracted
     assert len(events[int((DISTRACTED_SECONDS_TO_RED+2*_invisible_time+3.5)/DT_DMON)]) == 0
 
@@ -267,4 +277,3 @@ def test_enabled_states(enabled_state, lat_active_state, expected):
   actual_enabled = captured_args[0]
 
   assert actual_enabled == expected, f"Expected op_engaged={expected}, but got {actual_enabled}"
-
