@@ -58,7 +58,7 @@ class DRIVER_MONITOR_SETTINGS:
     self._DCAM_UNCERTAIN_RESET_COUNT = int(20  / self._DT_DMON)
     self._POSESTD_THRESHOLD = 0.3
     self._HI_STD_FALLBACK_TIME = int(10  / self._DT_DMON)  # fall back to wheel touch if model is uncertain for 10s
-    self._DISTRACTED_FILTER_TS = 0.35  # 0.6Hz
+    self._DISTRACTED_FILTER_TS = 0.35  # slightly smoother active distraction filtering
     self._ALWAYS_ON_ALERT_MIN_SPEED = 11
 
     self._POSE_CALIB_MIN_SPEED = 13  # 30 mph
