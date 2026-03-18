@@ -129,23 +129,24 @@ class TestMonitoring:
   #  - orange/red alert should remain after disappearance, and only disengaging clears red
   def test_biggest_comma_fan(self):
     _invisible_time = 2  # seconds
-    _second_disappearance_start = DISTRACTED_SECONDS_TO_RED + 2*_invisible_time + 0.5
+    _second_disappearance_start = DISTRACTED_SECONDS_TO_RED + _invisible_time + 0.5
+    _second_disappearance_end = _second_disappearance_start + _invisible_time
     ds_vector = always_distracted[:]
     interaction_vector = always_false[:]
     op_vector = always_true[:]
     ds_vector[int(DISTRACTED_SECONDS_TO_ORANGE/DT_DMON):int((DISTRACTED_SECONDS_TO_ORANGE+_invisible_time)/DT_DMON)] \
                                                         = [msg_NO_FACE_DETECTED] * int(_invisible_time/DT_DMON)
-    ds_vector[int(_second_disappearance_start/DT_DMON):int((_second_disappearance_start+_invisible_time)/DT_DMON)] \
+    ds_vector[int(_second_disappearance_start/DT_DMON):int(_second_disappearance_end/DT_DMON)] \
                                                         = [msg_NO_FACE_DETECTED] * int(_invisible_time/DT_DMON)
-    interaction_vector[int((_second_disappearance_start+0.5)/DT_DMON):int((_second_disappearance_start+1.5)/DT_DMON)] \
+    interaction_vector[int((_second_disappearance_end+0.5)/DT_DMON):int((_second_disappearance_end+1.5)/DT_DMON)] \
                                                         = [True] * int(1/DT_DMON)
-    op_vector[int((_second_disappearance_start+2.5)/DT_DMON):int((_second_disappearance_start+3)/DT_DMON)] \
+    op_vector[int((_second_disappearance_end+2.5)/DT_DMON):int((_second_disappearance_end+3)/DT_DMON)] \
                                                         = [False] * int(0.5/DT_DMON)
     events, _ = self._run_seq(ds_vector, interaction_vector, op_vector, always_false)
     assert events[int((DISTRACTED_SECONDS_TO_ORANGE+0.5*_invisible_time)/DT_DMON)].names[0] == EventName.promptDriverDistracted
     assert events[int((_second_disappearance_start+1.25)/DT_DMON)].names[0] == EventName.driverDistracted
     assert events[int((_second_disappearance_start+1.5)/DT_DMON)].names[0] == EventName.driverDistracted
-    assert len(events[int((_second_disappearance_start+3.5)/DT_DMON)]) == 0
+    assert len(events[int((_second_disappearance_end+3.5)/DT_DMON)]) == 0
 
   # engaged, invisible driver, down to orange, driver touches wheel; then down to orange again, driver appears
   #  - both actions should clear the alert, but momentary appearance should not
