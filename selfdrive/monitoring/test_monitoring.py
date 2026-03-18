@@ -85,8 +85,8 @@ class TestMonitoring:
                     ((TEST_TIMESPAN-10-d_status.settings._DISTRACTED_TIME)/2))/DT_DMON)].names[0] == EventName.driverDistracted
     assert isinstance(d_status.awareness, float)
 
-  # engaged, driver is briefly distracted in active monitoring
-  #  - brief glances should not trip the prompt or terminal alert too quickly
+  # engaged, driver is continuously distracted in active monitoring
+  #  - prompt and terminal alerts should escalate later than the stock timing
   def test_active_monitoring_escalates_later(self):
     events, d_status = self._run_seq(always_distracted, always_false, always_true, always_false)
     assert not any(EventName.promptDriverDistracted in event.names for event in events[:int(6.0 / DT_DMON)])
